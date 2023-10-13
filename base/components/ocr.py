@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 from numpy import ndarray
 
+import config
 from base.components.onnx_infer import OnnxRun
 from base.components.rec import Rec
 from base.components.utils.face import getFaceBoxs
@@ -38,7 +39,7 @@ class OcrRec(Rec):
         )
         self.predictions = []
 
-    async def inference(self, img: ndarray):
+    def inference(self, img: ndarray):
         filter_prediction: list = []
         dt_boxes: list = self.ocr_sys.get_boxes(img)
 
@@ -53,7 +54,7 @@ class OcrRec(Rec):
         self.predictions = filter_prediction
         return self.predictions
 
-    def display(self, img: ndarray, predictions: list, font_path=Path('../../resource/font/simfang.ttf')):
+    def display(self, img: ndarray, predictions: list, font_path=config.font_path):
         results = []
         if predictions:
             dt_boxes = [x.box for x in predictions]
@@ -62,9 +63,4 @@ class OcrRec(Rec):
 
             img = draw_ocr(img, dt_boxes, texts, scores, font_path=str(font_path))
         return img, results
-
-
-class WebsocketRec(Rec):
-    async def inference(self, img: ndarray):
-        pass
 

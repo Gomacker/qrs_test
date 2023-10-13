@@ -1,11 +1,13 @@
 import numpy as np
 from PIL import ImageFont, ImageDraw, Image
 
+import config
+
 
 def putText(
         img, text,
         org=(0, 0),
-        font_path="./resource/font/simsun.ttc",
+        font_path=config.font_path,
         color=(0, 0, 255),
         font_size=20
 ):

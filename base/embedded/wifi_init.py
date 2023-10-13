@@ -6,10 +6,6 @@ import numpy as np
 from base.embedded.constant import *
 
 
-# plate_label = ["京" , "津", "沪" , "渝", "冀", "豫", "云", "辽", "黑", "湘", "皖", "鲁", "新",
-#          "苏", "浙", "赣", "鄂", "桂", "甘", "晋", "蒙", "陕", "吉", "闽", "贵", "粤", "青",
-#          "藏", "川", "宁", "琼"]
-
 class WifiConfig:
     def __init__(self):
         try:
@@ -49,50 +45,6 @@ class WifiConfig:
 
     def send(self, send_dat: Union[bytes, np.ndarray]):
         self.client.send(send_dat)
-
-    # def gatePlate(self, plt="京123456"):
-    #     # 道闸显示车牌信息
-    #     # if len(plt) > 6:
-    #     #
-    #     #     log.info("--plate_len_err!!")
-    #     # else:
-    #     plate = list(map(ord, plt))
-    #     dat = 0x01
-    #     for i, str in enumerate(plate_label):
-    #         if str == plate[0]:
-    #             dat = hex(int(str(i), 16))
-    #
-    #     a, b, c, d, e, f = plate
-    #     send_dat = np.zeros((4,), np.uint8)
-    #     send_dat[0] = 0x55
-    #     send_dat[1] = 0xDD
-    #     send_dat[2] = 0x01
-    #     send_dat[3] = dat
-    #
-    #     send_dat[4] = a
-    #     send_dat[5] = b
-    #     send_dat[6] = c
-    #     send_dat[7] = d
-    #     send_dat[8] = e
-    #     send_dat[9] = f
-    #
-    #     send_dat[10] = 0x01
-    #     send_dat[11] = 0xBB
-    #     self.send(send_dat)
-
-
-# if __name__ == "__main__":
-#     import time
-#
-#     wifi = WifiConfig()
-#     while True:
-#         time.sleep(0.3)
-#         # data = wifi.datRead()
-#
-#         send_dat = input('enter for send data:')
-#         # wifi.send(send_dat.encode('utf-8'))
-#         wifi.send(bytes(1))
-
 
 if __name__ == '__main__':
     dat = np.zeros((4,), np.uint8)

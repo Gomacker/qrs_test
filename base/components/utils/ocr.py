@@ -10,6 +10,8 @@ from shapely.geometry import Polygon
 # from base.components.config import ai_cfg
 from PIL import Image, ImageDraw, ImageFont
 
+import config
+
 
 # PalldeOCR 检测模块 需要用到的图片预处理类
 class NormalizeImage:
@@ -587,7 +589,7 @@ def text_visual(texts,
                 img_h=400,
                 img_w=600,
                 threshold=0.,
-                font_path="./doc/simfang.ttf"):
+                font_path=config.font_path):
     """
     create new blank img and draw txt on it
     args:
@@ -692,8 +694,7 @@ def draw_ocr(image,
         scores = [1] * len(boxes)
     box_num = len(boxes)
     for i in range(box_num):
-        if scores is not None and (scores[i] < drop_score or
-                                   math.isnan(scores[i])):
+        if scores is not None and (scores[i] < drop_score or math.isnan(scores[i])):
             continue
         box = np.reshape(np.array(boxes[i]), [-1, 1, 2]).astype(np.int64)
         image = cv2.polylines(np.array(image), [box], True, (255, 0, 0), 2)
