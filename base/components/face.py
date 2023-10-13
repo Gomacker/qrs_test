@@ -18,8 +18,12 @@ class FaceDetectRec(Rec):
     class Precondition:
         box: ndarray
 
-    def __init__(self, face_det_path=FACE_DET_PATH, face_path=FACE_LIBRARY_PATH,
-                 face_name_path=FACE_NAME_PATH):
+    def __init__(
+            self,
+            face_det_path=FACE_DET_PATH,
+            face_path=FACE_LIBRARY_PATH,
+            face_name_path=FACE_NAME_PATH
+    ):
         self.onnx_run = OnnxRun(model_path=face_det_path)
         # self.face_rec = FaceRec(face_path=face_path, face_name_path=face_name_path)
 
@@ -33,13 +37,13 @@ class FaceDetectRec(Rec):
                 x, y, w, h, trk_id = bbox
                 cv2.rectangle(img, (int(x), int(y)), (int(w), int(h)), (255, 255, 0), 2)
 
-                cv2.putText(
-                    img,
-                    'GAY',
-                    (int(x), int(y)),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    1, (0, 0, 255), 2, cv2.LINE_AA
-                )
+                # cv2.putText(
+                #     img,
+                #     'Face',
+                #     (int(x), int(y)),
+                #     cv2.FONT_HERSHEY_SIMPLEX,
+                #     1, (0, 0, 255), 2, cv2.LINE_AA
+                # )
         return img, []
 
     async def inference(self, img: ndarray):
@@ -69,6 +73,9 @@ class FaceDetectRec(Rec):
         det_img[:new_height, :new_width, :] = resized_img
 
         input_size = tuple(det_img.shape[0:2][::-1])
-        input_data = cv2.dnn.blobFromImage(det_img, 1.0 / 128, input_size,
-                                           (127.5, 127.5, 127.5), swapRB=True)
+        input_data = cv2.dnn.blobFromImage(
+            det_img, 1.0 / 128, input_size,
+            (127.5, 127.5, 127.5),
+            swapRB=True
+        )
         return input_data

@@ -12,3 +12,9 @@ class Rec(abc.ABC):
     @abc.abstractmethod
     def display(self, img: ndarray, predictions: list):
         pass
+
+
+class EventHandler:
+
+    def __call__(self, *args, **kwargs):
+        pass
