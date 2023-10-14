@@ -28,6 +28,10 @@ class VideoThread(Thread):
     def run(self):
         while True:
             ret, frame = self.cap.read()
+
+            if frame is None:
+                continue
+
             frame: ndarray = cv2.resize(frame, (640, 480))
 
             if not self.q_camera.full() and frame is not None:
@@ -61,7 +65,7 @@ class RecManager:
             self.q_out: Queue = q_out
 
             self.inf: Optional[Any] = None
-            self.interval = 0.5
+            self.interval = 0.65
             self.last_inf_time = 0
 
             self.face_rec_params: Optional[FaceRecParams] = None
@@ -84,7 +88,7 @@ class RecManager:
                     self.face_rec_params = FaceRecParams(
                         last_success_time=0,
                         time_threshold=3,
-                        min_face_count=1
+                        min_face_count=2
                     )
                 if len(inf) >= self.face_rec_params.min_face_count:
                     if time.time() - self.face_rec_params.last_success_time > self.face_rec_params.time_threshold:
