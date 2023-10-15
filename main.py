@@ -45,6 +45,7 @@ class VideoThread(Thread):
             if cv2.waitKey(1) == ord('q'):
                 break
 
+
 @dataclasses.dataclass
 class FaceRecParams:
     last_success_time: float
@@ -93,6 +94,7 @@ class RecManager:
                 if len(inf) >= self.face_rec_params.min_face_count:
                     if time.time() - self.face_rec_params.last_success_time > self.face_rec_params.time_threshold:
                         logger.info(f'识别到多于{self.face_rec_params.min_face_count}人脸 [警报]')
+
                 else:
                     self.face_rec_params.last_success_time = time.time()
             if isinstance(self.rec, OcrRec):
@@ -119,8 +121,10 @@ class RecManager:
         self.q_modules = [self.q_camera] + self.q_modules + [self.q_rec]
         logger.info(self.q_modules)
         self.rec_module_threads: list[Thread] = [
-            RecManager.RecModuleThread(rec, self.q_modules[i], self.q_modules[i + 1]) for i, rec in
-            enumerate(self.enable_recs)]
+            RecManager.RecModuleThread(rec, self.q_modules[i], self.q_modules[i + 1])
+            for i, rec in
+            enumerate(self.enable_recs)
+        ]
 
     def run(self):
         for rec_module_thread in self.rec_module_threads:
