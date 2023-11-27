@@ -1,7 +1,5 @@
-import asyncio
 import dataclasses
 import logging
-import multiprocessing
 import time
 from multiprocessing import Queue
 from threading import Thread
@@ -9,8 +7,7 @@ from typing import Optional, Any
 
 import colorlog
 import cv2
-import numpy
-from flask import Flask, Request, Response
+from flask import Flask, Response
 from numpy import ndarray
 
 from base.components.face import FaceDetectRec
@@ -19,12 +16,12 @@ from base.components.rec import Rec
 
 
 class VideoThread(Thread):
-    def __init__(self, q_camera: Queue, q_rec: Queue):
+    def __init__(self, q_camera: Queue, q_result: Queue):
         super().__init__()
         self.cap = cv2.VideoCapture(0)
 
         self.q_camera: Queue = q_camera
-        self.q_rec: Queue = q_rec
+        self.q_result: Queue = q_result
 
     def run(self):
         while True:
@@ -38,8 +35,8 @@ class VideoThread(Thread):
             if not self.q_camera.full() and frame is not None:
                 self.q_camera.put(frame)
 
-            if not self.q_rec.empty():
-                frame = self.q_rec.get()
+            if not self.q_result.empty():
+                frame = self.q_result.get()
 
             cv2.imshow('Test rec', frame)
 
@@ -101,7 +98,7 @@ class RecManager:
             if isinstance(self.rec, OcrRec):
                 pass
 
-    def __init__(self, q_camera: Queue, q_rec: Queue):
+    def __init__(self, q_camera: Queue, q_result: Queue):
         logger.info('init RecManager')
 
         self.enable_recs: list = [
@@ -116,10 +113,10 @@ class RecManager:
         logger.info(self.enable_recs)
 
         self.q_camera: Queue = q_camera
-        self.q_rec: Queue = q_rec
+        self.q_result: Queue = q_result
 
-        self.q_modules: list[Queue] = [Queue(1) for _ in range(len(self.enable_recs) - 1)]
-        self.q_modules = [self.q_camera] + self.q_modules + [self.q_rec]
+        self.q_modules: list[Queue] = [Queue(5) for _ in range(len(self.enable_recs) - 1)]
+        self.q_modules = [self.q_camera] + self.q_modules + [self.q_result]
         logger.info(self.q_modules)
         self.rec_module_threads: list[Thread] = [
             RecManager.RecModuleThread(rec, self.q_modules[i], self.q_modules[i + 1])
@@ -138,10 +135,11 @@ fmt = colorlog.ColoredFormatter(
     '%(log_color)s[%(asctime)s] [%(filename)s:%(lineno)d] [%(module)s:%(funcName)s] [%(levelname)s]- %(message)s',
     log_colors={
         'DEBUG': 'cyan',
-        'INFO': 'green',
+        'INFO': 'white',
         'WARNING': 'yellow',
         'ERROR': 'red',
         'CRITICAL': 'red',
+        'SUCCESS': 'green'
     })
 ch = colorlog.StreamHandler()
 ch.setFormatter(fmt)
@@ -151,7 +149,7 @@ logger.addHandler(ch)
 class FlaskThread(Thread):
     def __init__(self):
         super().__init__()
-        self.app = Flask('main')
+        self.app = Flask(__name__)
         self.init_app()
 
     def init_app(self):
@@ -166,19 +164,19 @@ class FlaskThread(Thread):
 class MultiProcessorManager:
 
     def __init__(self):
-        self.q_camera: Queue = Queue(1)
-        self.q_rec: Queue = Queue(1)
+        self.q_camera: Queue = Queue(5)
+        self.q_result: Queue = Queue(5)
         self.video_thread: Optional[Thread] = None
         self.rec_thread: Optional[Thread] = None
         self.flask_thread: Optional[Thread] = None
 
     def video_run(self):
-        self.video_thread = VideoThread(self.q_camera, self.q_rec)
+        self.video_thread = VideoThread(self.q_camera, self.q_result)
         logger.info('启动视频采集进程...')
         self.video_thread.start()
 
     def rec_run(self):
-        self.rec_thread = RecManager(self.q_camera, self.q_rec)
+        self.rec_thread = RecManager(self.q_camera, self.q_result)
         logger.info('启动识别管理器...')
         self.rec_thread.run()
 
