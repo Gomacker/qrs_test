@@ -6,42 +6,12 @@ from threading import Thread
 from typing import Optional, Any
 
 import colorlog
-import cv2
-from flask import Flask, Response
-from numpy import ndarray
 
 from base.components.face import FaceDetectRec
 from base.components.ocr import OcrRec, SMALL_REC_PATH, LARGE_REC_PATH, PPOCR_KEYS_PATH, DET_PATH
 from base.components.rec import Rec
-
-
-class VideoThread(Thread):
-    def __init__(self, q_camera: Queue, q_result: Queue):
-        super().__init__()
-        self.cap = cv2.VideoCapture(0)
-
-        self.q_camera: Queue = q_camera
-        self.q_result: Queue = q_result
-
-    def run(self):
-        while True:
-            ret, frame = self.cap.read()
-
-            if frame is None:
-                continue
-
-            frame: ndarray = cv2.resize(frame, (640, 480))
-
-            if not self.q_camera.full() and frame is not None:
-                self.q_camera.put(frame)
-
-            if not self.q_result.empty():
-                frame = self.q_result.get()
-
-            cv2.imshow('Test rec', frame)
-
-            if cv2.waitKey(1) == ord('q'):
-                break
+from modules.rtc import FlaskThread
+from modules.video import VideoThread
 
 
 @dataclasses.dataclass
@@ -64,7 +34,7 @@ class RecManager:
             self.q_out: Queue = q_out
 
             self.inf: Optional[Any] = None
-            self.interval = 0.65
+            self.interval = 0.65  # 刷新间隔
             self.last_inf_time = 0
 
             self.face_rec_params: Optional[FaceRecParams] = None
@@ -124,7 +94,7 @@ class RecManager:
             enumerate(self.enable_recs)
         ]
 
-    def run(self):
+    def start(self):
         for rec_module_thread in self.rec_module_threads:
             rec_module_thread.start()
 
@@ -132,7 +102,8 @@ class RecManager:
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 fmt = colorlog.ColoredFormatter(
-    '%(log_color)s[%(asctime)s] [%(filename)s:%(lineno)d] [%(module)s:%(funcName)s] [%(levelname)s]- %(message)s',
+    # '%(log_color)s[%(asctime)s] [%(filename)s:%(lineno)d] [%(module)s:%(funcName)s] [%(levelname)s]- %(message)s',
+    '%(log_color)s[%(asctime)s] [%(levelname)s]- %(message)s',
     log_colors={
         'DEBUG': 'cyan',
         'INFO': 'white',
@@ -146,27 +117,12 @@ ch.setFormatter(fmt)
 logger.addHandler(ch)
 
 
-class FlaskThread(Thread):
-    def __init__(self):
-        super().__init__()
-        self.app = Flask(__name__)
-        self.init_app()
-
-    def init_app(self):
-        @self.app.get('/test')
-        def _():
-            return Response('')
-
-    def run(self):
-        self.app.run(port=5033)
-
-
 class MultiProcessorManager:
 
     def __init__(self):
         self.q_camera: Queue = Queue(5)
         self.q_result: Queue = Queue(5)
-        self.video_thread: Optional[Thread] = None
+        self.video_thread: Optional[VideoThread] = None
         self.rec_thread: Optional[Thread] = None
         self.flask_thread: Optional[Thread] = None
 
@@ -178,10 +134,10 @@ class MultiProcessorManager:
     def rec_run(self):
         self.rec_thread = RecManager(self.q_camera, self.q_result)
         logger.info('启动识别管理器...')
-        self.rec_thread.run()
+        self.rec_thread.start()
 
     def flask_run(self):
-        self.flask_thread = FlaskThread()
+        self.flask_thread = FlaskThread(self.video_thread)
         logger.info('启动web服务...')
         self.flask_thread.start()
 
