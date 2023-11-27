@@ -1,3 +1,4 @@
+import sys
 from threading import Thread
 from multiprocessing import Queue
 from typing import Callable, Any
@@ -14,7 +15,7 @@ class VideoThread(Thread):
         self.q_camera: Queue = q_camera
         self.q_result: Queue = q_result
 
-        self.hooks: list[Callable[[Any], Any]] = []
+        self.hooks: list[Callable[[ndarray], Any]] = []
 
     def run(self):
         while True:
@@ -35,3 +36,7 @@ class VideoThread(Thread):
 
             if cv2.waitKey(1) == ord('q'):
                 break
+
+    def on_frame(self, handler: Callable[[ndarray], Any]):
+        self.hooks.append(handler)
+        return self.hooks.index(handler)
