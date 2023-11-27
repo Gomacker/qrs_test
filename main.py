@@ -10,6 +10,7 @@ from typing import Optional, Any
 import colorlog
 import cv2
 import numpy
+from flask import Flask, Request, Response
 from numpy import ndarray
 
 from base.components.face import FaceDetectRec
@@ -147,6 +148,21 @@ ch.setFormatter(fmt)
 logger.addHandler(ch)
 
 
+class FlaskThread(Thread):
+    def __init__(self):
+        super().__init__()
+        self.app = Flask('main')
+        self.init_app()
+
+    def init_app(self):
+        @self.app.get('/test')
+        def _():
+            return Response('')
+
+    def run(self):
+        self.app.run(port=5033)
+
+
 class MultiProcessorManager:
 
     def __init__(self):
@@ -154,6 +170,7 @@ class MultiProcessorManager:
         self.q_rec: Queue = Queue(1)
         self.video_thread: Optional[Thread] = None
         self.rec_thread: Optional[Thread] = None
+        self.flask_thread: Optional[Thread] = None
 
     def video_run(self):
         self.video_thread = VideoThread(self.q_camera, self.q_rec)
@@ -165,6 +182,11 @@ class MultiProcessorManager:
         logger.info('启动识别管理器...')
         self.rec_thread.run()
 
+    def flask_run(self):
+        self.flask_thread = FlaskThread()
+        logger.info('启动web服务...')
+        self.flask_thread.start()
+
 
 if __name__ == '__main__':
     def main():
@@ -173,6 +195,7 @@ if __name__ == '__main__':
         logger.info('初始化完毕！')
         mpm.video_run()
         mpm.rec_run()
+        mpm.flask_run()
 
 
     main()
