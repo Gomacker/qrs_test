@@ -47,9 +47,9 @@ class RecManager:
                         time_threshold=3,
                         min_face_count=2
                     )
+                hooks.hook_manager.emit('face_inference', len(inf))
                 if len(inf) >= self.face_rec_params.min_face_count:
                     if time.time() - self.face_rec_params.last_success_time > self.face_rec_params.time_threshold:
-                        hooks.hook_manager.emit('face_inference', len(inf))
                         logger.info(f'识别到多于{self.face_rec_params.min_face_count}人脸 [警报]')
                 else:
                     self.face_rec_params.last_success_time = time.time()
@@ -130,12 +130,15 @@ class MultiProcessorManager:
         self.flask_thread.start()
 
 
+manager: MultiProcessorManager = MultiProcessorManager()
+
 if __name__ == '__main__':
     def main():
-        mpm = MultiProcessorManager()
-
+        global manager
         logger.info('初始化完毕！')
-        mpm.video_run()
-        mpm.rec_run()
-        mpm.flask_run()
+        manager.video_run()
+        manager.rec_run()
+        manager.flask_run()
+
+
     main()

@@ -67,6 +67,7 @@ class FaceDetectRec(Rec):
         # if self.alarm_count > 10:
         #     print(f'[{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] [WARN] 检测到2张以上人脸[EventHandler]')
 
+
         return self.predictions
 
     def img_preprocessing(self, img: ndarray):

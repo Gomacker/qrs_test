@@ -15,7 +15,7 @@ class VideoThread(Thread):
         self.q_camera: Queue = q_camera
         self.q_result: Queue = q_result
 
-        self.hooks: list[Callable[[ndarray], Any]] = []
+        self.hooks: list = []
 
     def run(self):
         while True:

@@ -4,9 +4,9 @@ from typing import Any, Callable
 
 class HookManager:
     def __init__(self):
-        self._hooks: dict[str, list[Callable[[Any], Any]]] = defaultdict(list)
+        self._hooks: dict = defaultdict(list)
 
-    def on(self, name: str) -> Callable[[Callable], Any]:
+    def on(self, name: str):
         def wrapper(func: Callable) -> Callable:
             self._hooks[name].append(func)
             return func

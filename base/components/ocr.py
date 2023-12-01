@@ -14,7 +14,7 @@ from base.components.utils.face import getFaceBoxs
 # import pydantic
 
 from base.components.utils.ocr import DetRecFunctions, draw_ocr
-
+from hooks import hook_manager
 
 DET_PATH = Path('./resource/model_zoo/det_model.onnx')
 SMALL_REC_PATH = Path('./resource/model_zoo/rec_model.onnx')
@@ -52,6 +52,7 @@ class OcrRec(Rec):
                 filter_prediction.append(OcrRec.Precondition(box, text, score))
 
         self.predictions = filter_prediction
+        hook_manager.emit('text_inference', [p.text for p in self.predictions])
         return self.predictions
 
     def display(self, img: ndarray, predictions: list, font_path=config.font_path):
