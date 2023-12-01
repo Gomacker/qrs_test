@@ -1,5 +1,4 @@
-from flask_opencv_streamer.streamer import Streamer
-import cv2
+import hooks
 import logging
 import time
 from multiprocessing import Queue
@@ -50,8 +49,8 @@ class RecManager:
                     )
                 if len(inf) >= self.face_rec_params.min_face_count:
                     if time.time() - self.face_rec_params.last_success_time > self.face_rec_params.time_threshold:
+                        hooks.hook_manager.emit('face_inference', len(inf))
                         logger.info(f'识别到多于{self.face_rec_params.min_face_count}人脸 [警报]')
-
                 else:
                     self.face_rec_params.last_success_time = time.time()
             if isinstance(self.rec, OcrRec):

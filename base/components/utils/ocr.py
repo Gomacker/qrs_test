@@ -712,16 +712,16 @@ def draw_ocr(
             continue
         box = np.reshape(np.array(boxes[i]), [-1, 1, 2]).astype(np.int64)
         image = cv2.polylines(np.array(image), [box], True, (255, 0, 0), 2)
-    if txts is not None:
-        # img = np.array(resize_img(image, input_size=600))
-        img = image
-        txt_img = text_visual(
-            txts,
-            scores,
-            img_h=img.shape[0],
-            img_w=350,
-            threshold=drop_score,
-            font_path=font_path)
-        img = np.concatenate([np.array(img), np.array(txt_img)], axis=1)
-        return img
+    # if txts is not None:
+    #     # img = np.array(resize_img(image, input_size=600))
+    #     img = image
+    #     txt_img = text_visual(
+    #         txts,
+    #         scores,
+    #         img_h=img.shape[0],
+    #         img_w=350,
+    #         threshold=drop_score,
+    #         font_path=font_path)
+    #     img = np.concatenate([np.array(img), np.array(txt_img)], axis=1)
+    #     return img
     return image

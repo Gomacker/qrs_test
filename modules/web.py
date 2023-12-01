@@ -41,7 +41,7 @@ class FlaskThread(Thread):
             self.streamer.update_frame(frame)
 
         self.video_thread.on_frame(video_frame_handler)
-        self.socketio = SocketIO()
+        self.socketio = SocketIO(self.streamer.flask)
         self.init_routes()
 
     def init_routes(self):

@@ -23,6 +23,7 @@ class FaceRecParams:
 
     min_face_count: int
 
+
 class FaceDetectRec(Rec):
     @dataclasses.dataclass
     class Precondition:
