@@ -1,33 +1,12 @@
-from asyncio import Queue
-from pathlib import Path
 from threading import Thread
 
-import playsound
 import requests
-from aiortc import VideoStreamTrack
-from av.frame import Frame
-from flask import Flask, Response, request
+from flask import Response, request
 from flask_socketio import SocketIO
-# from av.video.frame import VideoFrame
-# from av.video import VideoStream.Frame
 from numpy import ndarray
 
 import config
 from .video import VideoThread
-
-
-class VideoFrameTrack(VideoStreamTrack):
-    def __init__(self):
-        super().__init__()
-        self.queue = Queue()
-
-    async def recv(self) -> Frame:
-        frame = await self.queue.get()
-        return frame
-
-    def put_frame(self, frame: Frame):
-        self.queue.put_nowait(frame)
-        print(self.queue.qsize())
 
 
 class FlaskThread(Thread):
