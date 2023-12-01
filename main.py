@@ -1,28 +1,17 @@
-import dataclasses
+from flask_opencv_streamer.streamer import Streamer
+import cv2
 import logging
 import time
 from multiprocessing import Queue
 from threading import Thread
 from typing import Optional, Any
-
 import colorlog
 
-from base.components.face import FaceDetectRec
+from base.components.face import FaceDetectRec, FaceRecParams
 from base.components.ocr import OcrRec, SMALL_REC_PATH, LARGE_REC_PATH, PPOCR_KEYS_PATH, DET_PATH
 from base.components.rec import Rec
-from modules.rtc import FlaskThread
+from modules.web import FlaskThread
 from modules.video import VideoThread
-
-
-@dataclasses.dataclass
-class FaceRecParams:
-    last_success_time: float
-    time_threshold: float
-
-    tolerance_counter = 0
-    tolerance_limit = 5
-
-    min_face_count: int
 
 
 class RecManager:
@@ -150,6 +139,4 @@ if __name__ == '__main__':
         mpm.video_run()
         mpm.rec_run()
         mpm.flask_run()
-
-
     main()

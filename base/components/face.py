@@ -1,5 +1,4 @@
 import dataclasses
-import datetime
 
 import cv2
 import numpy as np
@@ -13,6 +12,16 @@ FACE_DET_PATH = "./resource/model_zoo/scrfd_500m_bnkps_shape160x160.onnx"
 FACE_LIBRARY_PATH = "./resource/face_library/"
 FACE_NAME_PATH = "./base/components/Face_Name.py"
 
+
+@dataclasses.dataclass
+class FaceRecParams:
+    last_success_time: float
+    time_threshold: float
+
+    tolerance_counter = 0
+    tolerance_limit = 5
+
+    min_face_count: int
 
 class FaceDetectRec(Rec):
     @dataclasses.dataclass

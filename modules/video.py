@@ -31,8 +31,8 @@ class VideoThread(Thread):
 
             if not self.q_result.empty():
                 frame = self.q_result.get()
-
-            cv2.imshow('Test rec', frame)
+            [h(frame) for h in self.hooks]
+            # cv2.imshow('Test rec', frame)
 
             if cv2.waitKey(1) == ord('q'):
                 break

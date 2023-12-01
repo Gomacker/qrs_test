@@ -126,13 +126,15 @@ class DBPostProcess:
     The post process for Differentiable Binarization (DB).
     """
 
-    def __init__(self,
-                 thresh=0.3,
-                 box_thresh=0.7,
-                 max_candidates=1000,
-                 unclip_ratio=2.0,
-                 use_dilation=False,
-                 **kwargs):
+    def __init__(
+            self,
+            thresh=0.3,
+            box_thresh=0.7,
+            max_candidates=1000,
+            unclip_ratio=2.0,
+            use_dilation=False,
+            **kwargs
+    ):
 
         self.thresh = thresh
         self.box_thresh = box_thresh
@@ -150,8 +152,10 @@ class DBPostProcess:
         bitmap = _bitmap
         height, width = bitmap.shape
 
-        outs = cv2.findContours((bitmap * 255).astype(np.uint8), cv2.RETR_LIST,
-                                cv2.CHAIN_APPROX_SIMPLE)
+        outs = cv2.findContours(
+            (bitmap * 255).astype(np.uint8), cv2.RETR_LIST,
+            cv2.CHAIN_APPROX_SIMPLE
+        )
         if len(outs) == 3:
             img, contours, _ = outs[0], outs[1], outs[2]
         elif len(outs) == 2:
@@ -311,23 +315,29 @@ class process_pred:
 class DetRecFunctions:
     def __init__(
             self,
-            use_large:bool,
-            det_file:str,
-            small_rec_file:str,
-            large_rec_file:str,
-            ppocr_keys:str
+            use_large: bool,
+            det_file: str,
+            small_rec_file: str,
+            large_rec_file: str,
+            ppocr_keys: str
     ):
-        self.onet_det_session = onnxruntime.InferenceSession(det_file, providers=['CUDAExecutionProvider',
-                                                                                  'TensorrtExecutionProvider',
-                                                                                  'CPUExecutionProvider'])
+        self.onet_det_session = onnxruntime.InferenceSession(det_file, providers=[
+            'CUDAExecutionProvider',
+            'TensorrtExecutionProvider',
+            'CPUExecutionProvider'
+        ])
         if use_large:
-            self.onet_rec_session = onnxruntime.InferenceSession(large_rec_file, providers=['CPUExecutionProvider',
-                                                                                            'CUDAExecutionProvider',
-                                                                                            'TensorrtExecutionProvider'])
+            self.onet_rec_session = onnxruntime.InferenceSession(large_rec_file, providers=[
+                'CPUExecutionProvider',
+                'CUDAExecutionProvider',
+                'TensorrtExecutionProvider'
+            ])
         else:
-            self.onet_rec_session = onnxruntime.InferenceSession(small_rec_file, providers=['CPUExecutionProvider',
-                                                                                            'CUDAExecutionProvider',
-                                                                                            'TensorrtExecutionProvider'])
+            self.onet_rec_session = onnxruntime.InferenceSession(small_rec_file, providers=[
+                'CPUExecutionProvider',
+                'CUDAExecutionProvider',
+                'TensorrtExecutionProvider'
+            ])
         self.infer_before_process_op, self.det_re_process_op = self.get_process()
         self.postprocess_op = process_pred(ppocr_keys, 'ch', True)
 
@@ -507,9 +517,11 @@ class DetRecFunctions:
             max(
                 np.linalg.norm(points[0] - points[3]),
                 np.linalg.norm(points[1] - points[2])))
-        pts_std = np.float32([[0, 0], [img_crop_width, 0],
-                              [img_crop_width, img_crop_height],
-                              [0, img_crop_height]])
+        pts_std = np.float32([
+            [0, 0], [img_crop_width, 0],
+            [img_crop_width, img_crop_height],
+            [0, img_crop_height]
+        ])
         M = cv2.getPerspectiveTransform(points, pts_std)
         dst_img = cv2.warpPerspective(
             img,
@@ -672,12 +684,14 @@ def resize_img(img, input_size=600):
     return img
 
 
-def draw_ocr(image,
-             boxes,
-             txts=None,
-             scores=None,
-             drop_score=0.5,
-             font_path="./doc/simfang.ttf"):
+def draw_ocr(
+        image,
+        boxes,
+        txts=None,
+        scores=None,
+        drop_score=0.5,
+        font_path="./doc/simfang.ttf"
+):
     """
     Visualize the results of OCR detection and recognition
     args:
@@ -711,5 +725,3 @@ def draw_ocr(image,
         img = np.concatenate([np.array(img), np.array(txt_img)], axis=1)
         return img
     return image
-
-
