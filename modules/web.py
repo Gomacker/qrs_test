@@ -1,7 +1,7 @@
 from threading import Thread
 
 import requests
-from flask import Response, request, jsonify
+from flask import Response, request, jsonify, Flask
 from flask_socketio import SocketIO
 from numpy import ndarray
 
@@ -16,6 +16,14 @@ class FlaskThread(Thread):
         super().__init__()
         self.video_thread = video
         self.streamer = Streamer(16060, False)
+        # self.streamer.flask._static_folder = r'D:\pyProjects\qrs_test\templates'
+        self.streamer.flask.config['STATIC_FOLDER'] = 'assets'
+        print(
+            "=" * 20,
+            self.streamer.flask.static_folder,
+            self.streamer.flask.static_url_path,
+        )
+        # self.streamer.flask.static_url_path = '/assets'
         self.text_inferences = list()
         self.face_inferences = 0
 
